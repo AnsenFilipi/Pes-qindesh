@@ -959,36 +959,58 @@
                 this.gameMode = mode;
                 document.getElementById('modeSelect').style.display = 'none';
                 
-                // Update labels based on mode and language
-                if (mode === 'local') {
-                    document.getElementById('player1ScoreTitle').textContent = this.t('player1') + ' ' + this.t('yourScore').split(' ')[1];
-                    document.getElementById('player2ScoreTitle').textContent = this.t('player2') + ' ' + this.t('yourScore').split(' ')[1];
-                    document.getElementById('player1ZoneTitle').textContent = this.t('player1').toUpperCase();
-                    document.getElementById('player2ZoneTitle').textContent = this.t('player2').toUpperCase();
+                // Show cutting screen - labels will be updated when game actually starts
+                this.showCuttingScreen();
+            }
+
+            updateGameLabels() {
+                // Update labels based on mode and language - called when game container is visible
+                if (this.gameMode === 'local') {
+                    const p1Title = document.getElementById('player1ScoreTitle');
+                    const p2Title = document.getElementById('player2ScoreTitle');
+                    const p1Zone = document.getElementById('player1ZoneTitle');
+                    const p2Zone = document.getElementById('player2ZoneTitle');
+                    
+                    if (p1Title) p1Title.textContent = this.t('player1') + ' Score';
+                    if (p2Title) p2Title.textContent = this.t('player2') + ' Score';
+                    if (p1Zone) p1Zone.textContent = this.t('player1').toUpperCase();
+                    if (p2Zone) p2Zone.textContent = this.t('player2').toUpperCase();
                 } else {
-                    document.getElementById('player1ScoreTitle').textContent = this.t('yourScore');
-                    document.getElementById('player2ScoreTitle').textContent = this.t('aiScore');
-                    document.getElementById('player1ZoneTitle').textContent = this.t('you').toUpperCase();
-                    document.getElementById('player2ZoneTitle').textContent = this.t('ai').toUpperCase();
+                    const p1Title = document.getElementById('player1ScoreTitle');
+                    const p2Title = document.getElementById('player2ScoreTitle');
+                    const p1Zone = document.getElementById('player1ZoneTitle');
+                    const p2Zone = document.getElementById('player2ZoneTitle');
+                    
+                    if (p1Title) p1Title.textContent = this.t('yourScore');
+                    if (p2Title) p2Title.textContent = this.t('aiScore');
+                    if (p1Zone) p1Zone.textContent = this.t('you').toUpperCase();
+                    if (p2Zone) p2Zone.textContent = this.t('ai').toUpperCase();
                 }
                 
                 // Update button texts
-                document.getElementById('drawBtn').textContent = this.t('drawFromDeck');
-                document.getElementById('playBtn').textContent = this.t('playCombination');
-                document.getElementById('sacrificeBtn').textContent = this.t('sacrificeCard');
-                document.querySelectorAll('.btn-secondary')[3].textContent = this.t('clearSelection');
-                document.querySelectorAll('.btn-secondary')[4].textContent = this.t('newGame');
-                document.querySelectorAll('.btn-secondary')[5].textContent = this.t('rules');
+                const drawBtn = document.getElementById('drawBtn');
+                const playBtn = document.getElementById('playBtn');
+                const sacrificeBtn = document.getElementById('sacrificeBtn');
                 
-                // Show cutting screen
-                this.showCuttingScreen();
+                if (drawBtn) drawBtn.textContent = this.t('drawFromDeck');
+                if (playBtn) playBtn.textContent = this.t('playCombination');
+                if (sacrificeBtn) sacrificeBtn.textContent = this.t('sacrificeCard');
+                
+                const secButtons = document.querySelectorAll('.controls .btn-secondary');
+                if (secButtons[1]) secButtons[1].textContent = this.t('clearSelection');
+                if (secButtons[2]) secButtons[2].textContent = this.t('newGame');
+                if (secButtons[3]) secButtons[3].textContent = this.t('rules');
             }
 
             showCuttingScreen() {
                 const cutter = this.firstGameStarter;
-                const cutterName = this.gameMode === 'local' 
-                    ? this.t('player' + (cutter + 1))
-                    : (cutter === 0 ? this.t('you') : this.t('ai'));
+                let cutterName;
+                
+                if (this.gameMode === 'local') {
+                    cutterName = cutter === 0 ? this.t('player1') : this.t('player2');
+                } else {
+                    cutterName = cutter === 0 ? this.t('you') : this.t('ai');
+                }
                 
                 if (this.gameMode === 'ai' && cutter === 1) {
                     // AI cuts automatically
@@ -1052,9 +1074,13 @@
                 
                 const messageDiv = document.getElementById('cutMessage');
                 const cutter = this.firstGameStarter;
-                const cutterName = this.gameMode === 'local' 
-                    ? this.t('player' + (cutter + 1))
-                    : (cutter === 0 ? this.t('you') : this.t('ai'));
+                
+                let cutterName;
+                if (this.gameMode === 'local') {
+                    cutterName = cutter === 0 ? this.t('player1') : this.t('player2');
+                } else {
+                    cutterName = cutter === 0 ? this.t('you') : this.t('ai');
+                }
                 
                 if (messageDiv) {
                     if (cutCard.rank === '2') {
@@ -1168,11 +1194,15 @@
                 }
                 
                 document.getElementById('gameContainer').style.display = 'block';
+                
+                // Update all game labels with translations now that container is visible
+                this.updateGameLabels();
+                
                 this.render();
                 
                 const starterName = this.gameMode === 'local' 
-                    ? `Player ${this.turn + 1}` 
-                    : (this.turn === 0 ? 'You' : 'AI');
+                    ? (this.turn === 0 ? this.t('player1') : this.t('player2'))
+                    : (this.turn === 0 ? this.t('you') : this.t('ai'));
                 
                 this.showMessage(`New round! ${starterName} goes first. Both players start with 8 cards and must sacrifice 1 card each (NO DRAW on first turn).`, 'info');
                 
